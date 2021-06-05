@@ -20,7 +20,6 @@ def getTotalBasicBasket(bfb, home=1):
 
     pass
 
-#dia y precios cuidados
 
 def getTotalExpenses(arr):
     pass
@@ -29,47 +28,34 @@ def getEngelCofficent(total_expenses,food_expenses):
     return food_expenses/total_expenses
     pass
 
-def getBasicFoodBasketProducts(arr):
-    df = pd.read_excel (r'Basic_Basket.xlsx')
-    pass
-
-def getChepeastProduct(products):
-    cheapestProduct = products[0]
-    for product in products:
-        if product.price<cheapestProduct.price:
-            cheapestProduct = product
-    return cheapestProduct
-
-def castUnit(raw_unit):
-    pass
-
-
-
 
 def getBasicFoodBasketByStore(store, cheapest=False, expensive=False):
-    df = pd.read_excel (r'Basic_Basket.xlsx')
-    basic_food_basket = {}
+    xls = pd.ExcelFile('Basic_Basket.xlsx')
+
+    df = pd.read_excel(xls, sheet_name=xls.sheet_names[0])
+    basic_food_basket_categories_df = pd.read_excel(xls, sheet_name=xls.sheet_names[1])
+
+
+    basic_food_basket = []
+    sum_basket = 0
     for i in range(0,len(df['Componente'])):
+        category = basic_food_basket_categories_df[store.__class__.__name__][i]
+
         name = df['Componente'][i]
-        unit = float((df['Unidades'][i]).replace('g','').replace('cc',''))/1000        
+        unit = float(str((df['Unidades'][i])).replace('g','').replace('cc',''))/1000
         products_include = str(df['Productos que se incluyen'][i]).split(",")
         if products_include[0]=='nan':
             if cheapest:
-                temp_p = getChepeastProduct(store.searchProduct(name))
-                print(temp_p.name, temp_p.price)
-                basic_food_basket[name] = temp_p.price_per_1000*unit
+                p = store.searchProduct(name, cheapest=True, category=category)
+                basic_food_basket.append(p)
 
 
 
-            pass
+
         else:
-            product_basket = []
-            for p in df['Productos que se incluyen'][i].split(","):
+
+            for p_name in df['Productos que se incluyen'][i].split(","):
                 if cheapest:
-                    product_basket.append(getChepeastProduct(store.searchProduct(p)))
-
-            basic_food_basket[name]=product_basket
-
-
-
-    pass
+                    print('CURRENT PRODUCT:', p_name)
+                    p = store.searchProduct(p_name, cheapest=True)
+                    basic_food_basket.append(p)            
