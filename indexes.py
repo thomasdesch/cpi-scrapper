@@ -1,5 +1,6 @@
 import pandas as pd
 import math
+import re
 
 class WrongTypeExeception(Exception):
     pass
@@ -29,7 +30,8 @@ def getEngelCofficent(total_expenses,food_expenses):
     pass
 
 
-def getBasicFoodBasketByStore(store, cheapest=False, expensive=False):
+
+def getBasicFoodBasketByStore(store, cheapest=True, expensive=False):
     xls = pd.ExcelFile('Basic_Basket.xlsx')
 
     df = pd.read_excel(xls, sheet_name=xls.sheet_names[0])
@@ -46,7 +48,9 @@ def getBasicFoodBasketByStore(store, cheapest=False, expensive=False):
         products_include = str(df['Productos que se incluyen'][i]).split(",")
         if products_include[0]=='nan':
             if cheapest:
-                p = store.searchProduct(name, cheapest=True, category=category)
+                p = store.searchProduct(name, cheapest=cheapest, category=category)
+                
+                p.price_in_basket = int(re.findall(r'(\d+)(?!.*\d)', df['Unidades'][i])[0])*p.price_per_1000/1000
                 basic_food_basket.append(p)
 
 
@@ -56,6 +60,12 @@ def getBasicFoodBasketByStore(store, cheapest=False, expensive=False):
 
             for p_name in df['Productos que se incluyen'][i].split(","):
                 if cheapest:
-                    print('CURRENT PRODUCT:', p_name)
-                    p = store.searchProduct(p_name, cheapest=True)
-                    basic_food_basket.append(p)            
+                    p = store.searchProduct(p_name, cheapest=cheapest)
+
+                    p.price_in_basket = int(re.findall(r'(\d+)(?!.*\d)', df['Unidades'][i])[0])*p.price_per_1000/1000
+                    print(p.name, p.price_in_basket)
+                    basic_food_basket.append(p)
+        bask = 0
+        for p in basic_food_basket:
+            bask += p.price_in_basket
+        print('TOTAL BASKET: ',bask)

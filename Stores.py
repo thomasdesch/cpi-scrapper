@@ -153,9 +153,6 @@ class Dia():
                 return _getNullProduct()
 
 
-
-
-
         #finds button to click (to show more products)
 
         #clicks until the button dissapears
@@ -186,11 +183,26 @@ class Dia():
             p.name = products_names[i].find('a').text.replace('\n','')
             p.price = float(products_prices[i].text.replace('$ ','').replace(',','.'))
             try:
-                p.weight = re.findall(r'(\d+)(?!.*\d)', p.name)[0]
+                if p.name.find(',')!=0:
+
+                    p.weight = float((re.findall('[+-]?([0-9]*[,])?[0-9]+', p.name)[0]+re.findall(r'(\d+)(?!.*\d)', p.name)[0]).replace(',','.'))
+                    
+                    if p.name.lower().find('gr'):
+                        p.weight = p.weight*100
+                    else:
+                        p.weight = p.weight*1000
+
+
+                else:
+                    p.weight = re.findall(r'(\d+)(?!.*\d)', p.name)[0]
+
+
             except IndexError:
-                p.weight = 1
+                p.weight = 1000
+
 
             p.price_per_1000 = ((1000*p.price)/p.weight)
+
             p.brand = products_brands[i].text
 
             p.name = products_names[i].find('a').text.replace('\n','')
